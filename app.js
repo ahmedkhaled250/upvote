@@ -1,18 +1,21 @@
-import { config } from "dotenv";
-config();
-import * as indexRouter from "./modules/index.router.js";
-import { connectDB } from "./DB/connect.js";
 import express from "express";
-const app = express();
-const port = process.env.port;
+import dotenv from "dotenv";
+import * as indexRouter from "./src/modules/index.router.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import connectDB from "./DB/connection.js";
+const __direName = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__direName, "/config/.env") });
 const baseUrl = process.env.BASEURL;
+const port = process.env.PORT || 5000;
+const app = express();
 app.use(express.json());
-// app.use(`${baseUrl}/upload`,  express.static('./upload'))
 app.use(`${baseUrl}/auth`, indexRouter.authRouter);
 app.use(`${baseUrl}/user`, indexRouter.userRouter);
+app.use(`${baseUrl}/comment`, indexRouter.commentRouter);
 app.use(`${baseUrl}/post`, indexRouter.postRouter);
-
-app.use("*", (req, res) => res.status(404).send("In-valid Routing"));
-
+app.use("*", (req, res) => {
+  return res.status(404).json({ message: "In-valid routing" });
+});
 connectDB();
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`Running................${port}`));
